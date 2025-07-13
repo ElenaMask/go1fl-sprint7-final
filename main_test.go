@@ -43,17 +43,18 @@ func TestCafeCount(t *testing.T) {
 	handler := http.HandlerFunc(mainHandle)
 
 	requests := []struct {
-		request string
-		want    int
+		city  string
+		count int
+		want  int
 	}{
-		{"/cafe?count=0&city=tula", 0},
-		{"/cafe?count=1&city=moscow", 1},
-		{"/cafe?count=2&city=tula", 2},
-		{"/cafe?count=100&city=moscow", min(100, len(cafeList["moscow"]))},
+		{"tula", 0, 0},
+		{"moscow", 1, 1},
+		{"tula", 2, 2},
+		{"moscow", 100, min(100, len(cafeList["moscow"]))},
 	}
 	for _, v := range requests {
 		response := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", v.request, nil)
+		req := httptest.NewRequest("GET", fmt.Sprintf("/cafe?city=%s&count=%d", url.QueryEscape(v.city), v.count), nil)
 		handler.ServeHTTP(response, req)
 		cafes := strings.Split(strings.TrimSpace(response.Body.String()), ",")
 		if len(cafes) == 1 && cafes[0] == "" {
